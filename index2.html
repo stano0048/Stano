@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Love</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+            position: relative;
+        }
+
+        header {
+            padding: 30px 0;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .time-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .message-container {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+        }
+
+        .message {
+            font-size: 1.8rem;
+            line-height: 1.6;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            color: #ff4d6d;
+            z-index: 1;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        .floating-hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            color: #ff4d6d;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-heart:nth-child(2n) {
+            color: #ff8fa3;
+            animation-duration: 8s;
+            animation-delay: 1s;
+        }
+
+        .floating-heart:nth-child(3n) {
+            color: #ffb3c1;
+            animation-duration: 10s;
+            animation-delay: 2s;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px #fff, 0 0 10px #ff4d6d, 0 0 15px #ff4d6d; }
+            50% { text-shadow: 0 0 10px #fff, 0 0 20px #ff4d6d, 0 0 30px #ff4d6d; }
+            100% { text-shadow: 0 0 5px #fff, 0 0 10px #ff4d6d, 0 0 15px #ff4d6d; }
+        }
+
+        .glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .time-specific {
+            display: none;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .message {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    
+    <div class="container">
+        <header>
+            <h1>For My Beautiful Girl, Davin ❤️</h1>
+            <div class="time-display" id="timeDisplay"></div>
+        </header>
+        
+        <div class="message-container">
+            <div class="message" id="message"></div>
+        </div>
+        
+        <footer>
+            Made with ❤️ for you, my love, By Stanley ❤️
+        </footer>
+    </div>
+
+    <script>
+        // Time-based messages
+        const messages = {
+            morning: [
+                "Good morning, my love! Waking up next to you is the best part of my day.",
+                "Rise and shine, beautiful! I hope your day is as radiant as your smile.",
+                "Morning, sweetheart! Just thinking about you makes this day better already.",
+                "Good morning, my angel! I can't wait to see you and start our day together.",
+                "Hello, gorgeous! May your morning be filled with warmth and love, just like my heart is when I think of you."
+            ],
+            afternoon: [
+                "Good afternoon, my love! Hope you're having a wonderful day. Thinking of you always.",
+                "Afternoon, beautiful! Just a reminder that you're the best thing that's ever happened to me.",
+                "Hello, my sweetheart! Hope your afternoon is as lovely as you are.",
+                "Good afternoon, darling! Sending you all my love and positive energy for the rest of your day.",
+                "Afternoon, my angel! No matter how busy my day gets, you're always on my mind."
+            ],
+            evening: [
+                "Good evening, my love! I hope you had a wonderful day. Can't wait to spend the evening with you.",
+                "Evening, beautiful! The stars are out, but none shine as bright as you.",
+                "Hello, my sweetheart! As the day winds down, my love for you only grows stronger.",
+                "Good evening, darling! Let's make tonight as magical as our love.",
+                "Evening, my angel! You make every moment special, and I'm so grateful for you."
+            ]
+        };
+
+        // DOM elements
+        const messageElement = document.getElementById('message');
+        const timeDisplayElement = document.getElementById('timeDisplay');
+        const floatingHeartsContainer = document.getElementById('floatingHearts');
+
+        // Create floating hearts
+        function createFloatingHearts() {
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️';
+                heart.classList.add('floating-heart');
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.top = `${Math.random() * 100}%`;
+                heart.style.animationDelay = `${Math.random() * 5}s`;
+                floatingHeartsContainer.appendChild(heart);
+            }
+        }
+
+        // Create falling hearts
+        function createFallingHeart() {
+            const heart = document.createElement('div');
+            heart.innerHTML = '❤️';
+            heart.classList.add('heart');
+            
+            // Random size
+            const size = Math.random() * 30 + 20;
+            heart.style.fontSize = `${size}px`;
+            
+            // Random starting position
+            heart.style.left = `${Math.random() * 100}vw`;
+            heart.style.top = `-50px`;
+            
+            // Random animation duration
+            const duration = Math.random() * 5 + 5;
+            heart.style.animationDuration = `${duration}s`;
+            
+            document.body.appendChild(heart);
+            
+            // Remove heart after animation completes
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+
+        // Update time and message
+        function updateTimeAndMessage() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            
+            // Determine time of day
+            let timeOfDay;
+            if (hours >= 5 && hours < 12) {
+                timeOfDay = 'morning';
+            } else if (hours >= 12 && hours < 18) {
+                timeOfDay = 'afternoon';
+            } else {
+                timeOfDay = 'evening';
+            }
+            
+            // Update time display
+            timeDisplayElement.textContent = `${hours % 12 || 12}:${minutes}:${seconds} ${hours >= 12 ? 'PM' : 'AM'}`;
+            
+            // Update message
+            const messageArray = messages[timeOfDay];
+            const randomMessage = messageArray[Math.floor(Math.random() * messageArray.length)];
+            messageElement.textContent = randomMessage;
+            
+            // Add glow effect to message
+            messageElement.classList.add('glow');
+            setTimeout(() => {
+                messageElement.classList.remove('glow');
+            }, 2000);
+        }
+
+        // Initialize
+        createFloatingHearts();
+        updateTimeAndMessage();
+        
+        // Update time every second
+        setInterval(updateTimeAndMessage, 1000);
+        
+        // Create falling hearts at intervals
+        setInterval(createFallingHeart, 300);
+        
+        // Additional random falling hearts
+        setInterval(() => {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(createFallingHeart, i * 200);
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

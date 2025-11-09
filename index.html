@@ -1,0 +1,309 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For You — A Little Romantic Page</title>
+  <style>
+    :root{
+      --bg1:#0f172a; /* deep navy */
+      --bg2:#111827;
+      --accent:#ff7aa2; /* pink */
+      --accent-2:#ffb3c6;
+      --glass: rgba(255,255,255,0.06);
+      --card-bg: rgba(255,255,255,0.03);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background: radial-gradient(circle at 10% 10%, rgba(255,122,162,0.06), transparent 10%),linear-gradient(180deg,var(--bg1),var(--bg2));color:#fff;overflow:hidden}/* center card */
+.card{
+  position:relative;
+  max-width:920px;margin:40px auto;padding:28px;border-radius:20px;background:linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));box-shadow:0 6px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px);
+}
+h1{margin:0 0 6px;font-weight:700;font-size:28px;letter-spacing:0.2px}
+.sub{opacity:0.85;margin:0 0 18px}
+
+.time-msg{
+  font-size:20px;padding:18px;border-radius:12px;background:var(--card-bg);display:flex;align-items:center;gap:12px
+}
+
+.controls{display:flex;gap:10px;margin-top:14px}
+.btn{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.08);cursor:pointer}
+
+/* hearts layer */
+.hearts-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.heart{
+  position:absolute;will-change:transform,opacity;pointer-events:auto;display:inline-block;text-shadow:0 2px 10px rgba(0,0,0,0.4);font-size:20px;transform-origin:center center
+}
+
+/* animation keyframes */
+@keyframes fallDown{
+  0%{transform: translateY(-10vh) scale(0.4);opacity:0}
+  10%{opacity:1}
+  100%{transform: translateY(110vh) rotate(360deg) scale(1);opacity:0}
+}
+@keyframes leftToRight{
+  0%{transform: translateX(-15vw) translateY(0) scale(0.6);opacity:0}
+  10%{opacity:1}
+  50%{transform: translateX(50vw) translateY(25vh) rotate(90deg) scale(1)}
+  100%{transform: translateX(115vw) translateY(50vh) rotate(180deg) scale(0.8);opacity:0}
+}
+@keyframes rightToLeft{
+  0%{transform: translateX(115vw) translateY(-10vh) scale(0.6);opacity:0}
+  10%{opacity:1}
+  70%{transform: translateX(50vw) translateY(30vh) rotate(-90deg) scale(1)}
+  100%{transform: translateX(-30vw) translateY(80vh) rotate(-200deg) scale(0.7);opacity:0}
+}
+@keyframes riseUp{
+  0%{transform: translateY(110vh) scale(0.6);opacity:0}
+  10%{opacity:1}
+  100%{transform: translateY(-30vh) rotate(-360deg) scale(1);opacity:0}
+}
+
+/* animation utility classes */
+.anim-fall{animation-name:fallDown;}
+.anim-lr{animation-name:leftToRight;}
+.anim-rl{animation-name:rightToLeft;}
+.anim-rise{animation-name:riseUp;}
+
+/* small footer */
+.footer{opacity:0.7;margin-top:16px;font-size:13px}
+
+/* interactive heart button */
+.float-heart-btn{position:absolute;right:22px;top:22px;padding:8px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:#111;font-weight:700;cursor:pointer}
+
+/* message styling */
+.message-large{font-size:32px;font-weight:700;margin-top:18px}
+.credit{opacity:0.6;font-size:13px;margin-top:8px}
+
+/* responsiveness */
+@media (max-width:640px){.card{margin:18px;padding:18px;border-radius:16px}.message-large{font-size:24px}}
+
+  </style>
+</head>
+<body>
+  <div class="hearts-layer" id="heartsLayer"></div>  <div class="card" role="main" aria-labelledby="title">
+    <h1 id="title">STANLEY<br>Good day, my Love ❤️ By Stanley.</h1>
+    <p class="sub">I made this little page just for you — keeping it lively so it never goes quiet.</p><div class="time-msg" id="timeMsg">
+  <div style="flex:1">
+    <div class="message-large" id="messageText">Loading a sweet message...</div>
+    <div class="credit" id="timeInfo"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn" id="toggleHearts">Pause Hearts</button>
+    <button class="btn" id="nextMsg">New Message</button>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn" id="sendHeartBtn">Send a Heart</button>
+  <button class="btn" id="toggleBg">Switch Glow</button>
+  <button class="btn" id="downloadBtn">Save as PNG</button>
+</div>
+
+<p class="footer">Tip: This page, made by Stanley, updates its message by local time and keeps the hearts flowing — share the file or host it to keep it alive. ♥</p>
+
+<button class="float-heart-btn" id="quickHeart">❤</button>
+
+  </div>  <script>
+    /* ---------------------- Configuration ---------------------- */
+    const config = {
+      spawnRateMs: 600, // how often to spawn hearts when active
+      maxHearts: 120, // limit to avoid performance problems
+      heartChars: ['❤','💖','💕','💘','💓','💝'],
+      // time windows (24h): morning 05:00-11:59, afternoon 12:00-16:59, evening/night 17:00-04:59
+      messages: {
+        morning: [
+          "Good morning, beautiful — may your day be as lovely as your smile.",
+          "Woke up thinking of you. Have a morning wrapped in hugs.",
+          "Morning, my sunshine. Your smile is my favorite sunrise.",
+          "A sweet morning to the one who makes my heart skip — miss you already."
+        ],
+        afternoon: [
+          "Good afternoon, love — I hope your day is going splendidly.",
+          "Sending you afternoon kisses and a little reminder: I'm thinking of you.",
+          "Hope your afternoon is soft and sweet, just like you.",
+          "Halfway through the day and all I want is you beside me."
+        ],
+        night: [
+          "Good night, my love. Dream of us and wake with a smile.",
+          "Holding you in my thoughts as the stars watch over you.",
+          "Sleep tight. I'll be counting heartbeats until I see you again.",
+          "The night is gentle — as are my wishes for you. Sleep well, babe."
+        ]
+      }
+    };
+
+    /* ---------------------- Time-based message logic ---------------------- */
+    const messageText = document.getElementById('messageText');
+    const timeInfo = document.getElementById('timeInfo');
+
+    function getPeriod(date){
+      const h = date.getHours();
+      if(h>=5 && h<12) return 'morning';
+      if(h>=12 && h<17) return 'afternoon';
+      return 'night';
+    }
+
+    function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+    function updateMessage(forcePeriod=null){
+      const now = new Date();
+      const period = forcePeriod || getPeriod(now);
+      const msg = pickRandom(config.messages[period]);
+      messageText.textContent = msg;
+      timeInfo.textContent = `It's ${now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} — ${period}`;
+    }
+
+    /* refresh message every 30 seconds so it's "active" and changes while open */
+    updateMessage();
+    setInterval(()=>updateMessage(), 30000);
+
+    /* next message on button press */
+    document.getElementById('nextMsg').addEventListener('click', ()=>updateMessage());
+
+    /* ---------------------- Hearts animation system ---------------------- */
+    const layer = document.getElementById('heartsLayer');
+    let heartsActive = true;
+    let heartsCount = 0;
+
+    function randomRange(min,max){return Math.random()*(max-min)+min}
+
+    function spawnHeart(direction = null){
+      if(!heartsActive) return;
+      if(heartsCount >= config.maxHearts) return;
+      heartsCount++;
+
+      const el = document.createElement('div');
+      el.className = 'heart';
+      el.innerText = pickRandom(config.heartChars);
+
+      // size and style
+      const size = Math.round(randomRange(18,46));
+      el.style.fontSize = size + 'px';
+      el.style.opacity = (randomRange(0.6,1)).toFixed(2);
+
+      // pick a direction if none given
+      const dirs = ['fall','lr','rl','rise'];
+      const dir = direction || dirs[Math.floor(Math.random()*dirs.length)];
+      let animClass = 'anim-fall';
+      let duration = randomRange(5000,12000);
+
+      if(dir==='fall'){
+        animClass='anim-fall';
+        // spawn somewhere across the width
+        el.style.left = randomRange(2,96) + 'vw';
+        el.style.top = '-6vh';
+      } else if(dir==='lr'){
+        animClass='anim-lr';
+        el.style.left = '-10vw';
+        el.style.top = randomRange(5,70)+'vh';
+      } else if(dir==='rl'){
+        animClass='anim-rl';
+        el.style.left = '110vw';
+        el.style.top = randomRange(-10,60)+'vh';
+        duration = randomRange(7000,14000);
+      } else { // rise
+        animClass='anim-rise';
+        el.style.left = randomRange(10,88)+'vw';
+        el.style.top = '110vh';
+        duration = randomRange(6000,12000);
+      }
+
+      el.classList.add(animClass);
+      el.style.animationDuration = (duration/1000).toFixed(2) + 's';
+      el.style.zIndex = 1 + Math.floor(randomRange(0,50));
+      el.style.transform = `translateZ(0)`;
+
+      // subtle shadow dependent on size
+      el.style.filter = `drop-shadow(0 6px ${Math.min(24,size)*0.04}px rgba(0,0,0,0.45))`;
+
+      // allow click to pop a heart (interactive)
+      el.style.pointerEvents = 'auto';
+      el.addEventListener('click', (e)=>{
+        // small burst
+        e.stopPropagation();
+        popHeart(el);
+      });
+
+      layer.appendChild(el);
+
+      // remove after animation end
+      el.addEventListener('animationend', ()=>{
+        if(el && el.parentElement) el.parentElement.removeChild(el);
+        heartsCount--;
+      });
+    }
+
+    function popHeart(el){
+      // quick scale + fade
+      el.style.transition = 'transform 220ms ease, opacity 220ms ease';
+      el.style.transform = 'scale(1.8) rotate(' + Math.round(randomRange(-90,90)) + 'deg)';
+      el.style.opacity = '0';
+      setTimeout(()=>{ if(el.parentElement) el.parentElement.removeChild(el); heartsCount--; }, 250);
+    }
+
+    // automatic spawner
+    let spawner = setInterval(()=>spawnHeart(), config.spawnRateMs);
+
+    document.getElementById('toggleHearts').addEventListener('click', (e)=>{
+      heartsActive = !heartsActive;
+      e.target.textContent = heartsActive ? 'Pause Hearts' : 'Play Hearts';
+      if(heartsActive && !spawner) spawner = setInterval(()=>spawnHeart(), config.spawnRateMs);
+      if(!heartsActive && spawner){ clearInterval(spawner); spawner = null; }
+    });
+
+    // quick heart from button spawns one with a pop animation and small audio vibration (if supported)
+    document.getElementById('sendHeartBtn').addEventListener('click', ()=>{
+      spawnHeart('fall');
+    });
+    document.getElementById('quickHeart').addEventListener('click', ()=>{
+      const b = document.getElementById('quickHeart');
+      b.animate([{transform:'scale(1)'},{transform:'scale(1.25)'},{transform:'scale(1)'}],{duration:220});
+      spawnHeart('lr');
+      spawnHeart('rl');
+    });
+
+    /* Toggle background glow */
+    let glowOn = false;
+    document.getElementById('toggleBg').addEventListener('click', ()=>{
+      glowOn = !glowOn;
+      document.body.style.background = glowOn ? 'radial-gradient(circle at 30% 20%, rgba(255,122,162,0.06), transparent 12%), linear-gradient(180deg,#1b1f3a,#0b0820)' : 'radial-gradient(circle at 10% 10%, rgba(255,122,162,0.06), transparent 10%),linear-gradient(180deg,var(--bg1),var(--bg2))';
+    });
+
+    /* Download a snapshot (optional) - simple html2canvas-like approach using SVG foreignObject (works on modern browsers) */
+    document.getElementById('downloadBtn').addEventListener('click', async ()=>{
+      try{
+        const svg = `<?xml version="1.0" standalone="no"?>\n` +
+          `<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='700'>` +
+          `<foreignObject width='100%' height='100%'>` +
+          new XMLSerializer().serializeToString(document.querySelector('.card').cloneNode(true)) +
+          `</foreignObject></svg>`;
+        const blob = new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'for-you.svg'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      }catch(err){alert('Unable to save snapshot in this browser.');}
+    });
+
+    /* make page "active" by listening to mouse/touch and spawning small hearts when user interacts */
+    ['mousemove','touchstart','touchmove','click'].forEach(ev=>{
+      window.addEventListener(ev, (e)=>{
+        // sometimes spawn a heart near the pointer
+        if(Math.random() < 0.08) spawnHeart(['lr','fall','rl','rise'][Math.floor(Math.random()*4)]);
+      }, {passive:true});
+    });
+
+    /* clean up if user switches tabs - keep some hearts but reduce spawn rate */
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden){
+        if(spawner){ clearInterval(spawner); spawner = setInterval(()=>spawnHeart(), 1500); }
+      } else {
+        if(spawner){ clearInterval(spawner); spawner = setInterval(()=>spawnHeart(), config.spawnRateMs); }
+      }
+    });
+
+    // Seed a gentle shower on first load
+    for(let i=0;i<8;i++) spawnHeart();
+  </script></body>
+</html>
